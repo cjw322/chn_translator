@@ -1,3 +1,9 @@
+@font-face {
+  font-family: Noto-Sans;
+  src: url('../fonts/Noto_Sans_SC/NotoSansSC-Regular.otf');
+}
+
+
 .textarea {
   display: block;
   width: 100%;
@@ -5,4 +11,13 @@
   resize: both;
   min-height: 40px;
   line-height: 20px;
+}
+
+.character-bubble {
+  background-color: #729B79;
+  color: white;
+  border-radius: 25px;
+  padding: 1px 5px 1px 7px;
+  font-family: Noto-Sans;
+  font-size: 1.5rem;
 }

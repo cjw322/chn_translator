@@ -22,8 +22,6 @@
 
   <div class="input-side">
     <form name="input-form" action="{{ url_for('input') }}" method="POST">
-      <!-- <label for="input"><strong>Enter Text to Translate</strong> </label><br> -->
-      <!-- <input type="text" name="input" id="input" value="{{ input }}"> -->
       <p>
         <strong>Enter Text to Translate: </strong>
         <textarea class="textarea resize-ta" name="input" id="input" value="{{ input }}">{{ input }}</textarea>
@@ -31,21 +29,30 @@
       <input type="submit" value="Submit">
     </form>
   </div>
+
   <div class="trans-side">
-    <!-- {% if input %}<p>{{ input }}</p>{% endif %} -->
     {% if seg_list %}
     <p>
       {% for segment in seg_list %}
-      <span class="segment">
+
+      <!-- check for line breaks and spaces -->
+      <!-- {{segment}} -->
+      {% if ((segment[0][1] == -1) and ((segment[0][0] == '\n') or (segment[0][0] == '\r'))) %} <br>
+      {% elif ((segment[0][1] == -1) and (segment[0][0] == ' '))%} &ensp;
+
+      {% else %}
+
+      <!-- add pinyin -->
+
+      <span class="character-bubble">
         {% for character in segment %}
-        {% if character[0] == '\n' %}
-        <br>
-        {% else %}
-        <span class="character"
-          id="seg{% if character[1] != -1 %}{{ character[1] }}{% endif %}">{{ character[0] }}</span>
-        {% endif %}
+        <span class="character" id="seg{% if character[1] != -1 %}{{ character[1] }}{% endif %}">
+          {{ character[0] }}
+        </span>
         {% endfor %}
       </span>
+
+      {% endif %}
       {% endfor %}
     </p>
     {% endif %}

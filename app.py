@@ -52,7 +52,7 @@ def create_tk_dict(tk_list):
   tk_dict = {}
 
   for tk in tk_list:
-    # print("word %s\t\t start: %d \t\t end:%d" % (tk[0],tk[1],tk[2]))
+    print("word %s\t\t start: %d \t\t end:%d" % (tk[0],tk[1],tk[2]))
     token = tk[0]
     start = tk[1]
     end = tk[2]
@@ -78,7 +78,7 @@ def create_trans_dict(text, tk_list):
   {'家': ('jiā', 'Home'), '大': ('dà', 'Big'), 
   '好': ('hǎo', 'it is good'), '大家': ('dàjiā', 'Everyone')}
   """
-  # print("Creating Trans Dict")
+  print("Creating Trans Dict")
   trans_dict = {}
   tokens = {tk[0] for tk in tk_list}
   characters = {c for c in text if  is_chn(c)}
@@ -89,7 +89,8 @@ def create_trans_dict(text, tk_list):
       if t not in trans_dict:
         py = pinyin.get(t)
         translator = Translator()
-        # print(translator.translate(t))
+        print('t: ', t)
+        print(translator.translate(t))
         trans = translator.translate(t).text
         trans_dict.update({ t : (py, trans) })
       else:
