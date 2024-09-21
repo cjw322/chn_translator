@@ -20,18 +20,24 @@ def input():
 
 @app.route('/translate/<text>')
 def translate(text):
-  tk_dict = create_tk_dict(jieba.tokenize(text,mode='search'))
-  trans_dict = create_trans_dict(text, jieba.tokenize(text,mode='search'))
+  token_list = jieba.tokenize(text,mode='search')
+  tk_dict = create_tk_dict(token_list)
+  trans_dict = create_trans_dict(text, token_list)
   seg_list = create_seg_list(text)
-  # print('\n\n\n\n\nResults')
-  # print('tk dict ', tk_dict)
-  # print('trans dict ', trans_dict)
-  # print('seg list', seg_list)
-  return render_template(
-    "index.html", 
-    input=text, seg_list=seg_list, 
-    tkn_dict=tk_dict, trans_dict=trans_dict
-  )
+  print('\n\n\n\n\nResults')
+  print('token list ', list(token_list))
+  print('trans dict ', trans_dict)
+  # return render_template(
+  #   "index.html", 
+  #   input=text, seg_list=seg_list, 
+  #   tkn_dict=tk_dict, trans_dict=trans_dict
+  # )
+  result = {
+    "segments": seg_list,
+    "tokens": tk_dict,
+    "translations": trans_dict
+  }
+  return result
 
 
 def is_chn(character):
@@ -52,7 +58,7 @@ def create_tk_dict(tk_list):
   tk_dict = {}
 
   for tk in tk_list:
-    print("word %s\t\t start: %d \t\t end:%d" % (tk[0],tk[1],tk[2]))
+    # print("word %s\t\t start: %d \t\t end:%d" % (tk[0],tk[1],tk[2]))
     token = tk[0]
     start = tk[1]
     end = tk[2]
@@ -78,7 +84,7 @@ def create_trans_dict(text, tk_list):
   {'家': ('jiā', 'Home'), '大': ('dà', 'Big'), 
   '好': ('hǎo', 'it is good'), '大家': ('dàjiā', 'Everyone')}
   """
-  print("Creating Trans Dict")
+  # print("Creating Trans Dict")
   trans_dict = {}
   tokens = {tk[0] for tk in tk_list}
   characters = {c for c in text if  is_chn(c)}
@@ -89,8 +95,8 @@ def create_trans_dict(text, tk_list):
       if t not in trans_dict:
         py = pinyin.get(t)
         translator = Translator()
-        print('t: ', t)
-        print(translator.translate(t))
+        # print('t: ', t)
+        # print(translator.translate(t))
         trans = translator.translate(t).text
         trans_dict.update({ t : (py, trans) })
       else:

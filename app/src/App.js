@@ -1,33 +1,16 @@
-import logo from './logo.svg';
 import './App.css';
 import React, { useState, useEffect } from 'react';
-
-// class App extends React.Component {
-
-// render() {
-//   return (
-//     <div className="main-content">
-//       <h1>Chinese Text Annotator</h1>
-
-//       <div className="input-half">
-//         <InputForm />
-//       </div>
-//       <div>
-//         <p>
-//           {this.props.translated}
-//         </p>
-//       </div>
-//     </div>
-//   );
-// }
-// }
+import SegmentList from './components/SegmentList.js';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: '',
-      res: ''
+      inputText: "",
+      acceptingInput: true,
+      translations: null,
+      segments: [],
+      tokens: null
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -35,60 +18,64 @@ class App extends React.Component {
   }
 
   handleChange(event) {
-    this.setState({ value: event.target.value });
+    this.setState({ inputText: event.target.value });
   }
 
   handleSubmit(event) {
-    console.log('sending req to flask')
-    console.log(JSON.stringify(this.state.value))
-    fetch('/input', {
-      method: "POST",
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        input: this.state.value
-      })
-    }).then(response => {
-      console.log(response)
+    event.preventDefault();
+    alert(JSON.stringify(this.state.inputText))
+
+    fetch('http://127.0.0.1:5000/translate/' + this.state.inputText
+    ).then(response => {
       return response.json()
     }).then(json => {
-      console.log = (json)
       this.setState({
-        res: json[0]
+        translations: json["translations"],
+        segments: json["segments"],
+        tokens: json["tokens"],
+        acceptingInput: false
       })
     })
   }
 
   render() {
-    if (this.state.res) {
-      const segList = this.state.res[0]
-      const transDict = this.state.res[1]
-      var items = { segList }.map((word, i) => {
-        return <span key={i}>{word}</span>;
-      });
-    } else {
-      var items = []
-    }
+    // if (this.state.segments) {
+    //   var items = this.state.segments.map((word, i) => {
+    //     return <span key={i}>{word}</span>;
+    //   });
+    // } else {
+    //   var items = []
+    // }
 
     return (
       <div className="main-content">
-        <h1>Chinese Text Annotator</h1>
-
-        <div className="input-half">
+        <div className="text-side">
+          <h1>Chinese Text Annotator</h1>
           <form onSubmit={this.handleSubmit}>
             <label>
-              Enter Text to Translate
+              <h3 className="translate-header">Enter Text to Translate</h3>
               <input type="text" value={this.state.value} onChange={this.handleChange} />
             </label>
             <input type="submit" value="Submit" />
           </form>
+          <div className="annotated-text">
+            <div className="annotated-text">
+              <p>
+                {/* {JSON.stringify(this.state.segments)}
+                {JSON.stringify(this.state.tokens)} */}
+                {JSON.stringify(this.state.translations)}
+              </p>
+            </div>
+          </div>
         </div>
-        <div>
-          <p>
-            {items}
-          </p>
+
+        <div className="translated-side">
+          <div className="translated-text-box">
+            {this.state.segments && this.state.translations != null && <SegmentList
+              segments={this.state.segments}
+              translations={this.state.translations}
+            />}
+          </div>
         </div>
       </div>
     );
