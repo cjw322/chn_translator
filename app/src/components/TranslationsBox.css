@@ -1,5 +1,6 @@
 .translations-box {
   border: 5px #729B79 solid;
   border-radius: 25px;
-  padding: 3%
+  padding: 3%;
+  margin-top: 5vh;
 }

@@ -28,12 +28,13 @@ def generateAnnotations(text):
 # Route to return tokens + translations for a piece of text
 @app.route('/tokenizeAndTranslateTokens/<text>')
 def tokenizeAndTranslateTokens(text):
+  translator = Translator()
   token_list = jieba.tokenize(text, mode='search')
   trans_dict = {}
   for token in token_list:
     tk = token[0]
     if is_chn(tk) and tk != text:
-      trans_dict[tk] = translate(tk)
+      trans_dict[tk] = translator.translate(tk).text
   print("trans_dict: ", trans_dict)
   return { "token_translations_map": trans_dict }
 

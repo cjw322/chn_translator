@@ -21,13 +21,17 @@ class App extends React.Component {
   }
 
   handleChange(event) {
-    this.setState({ submitClicked: false })
-    this.setState({ inputText: event.target.value });
+    this.setState({ submitClicked: false, inputText: event.target.value });
   }
 
   handleSubmit(event) {
     event.preventDefault();
-    this.setState({ submitClicked: true })
+    this.setState({
+      submitClicked: true,
+      clickedSegment: null,
+      segments: [],
+      pinyin_map: null
+    })
 
     fetch('http://127.0.0.1:5000/generateAnnotations/' + this.state.inputText
     ).then(response => {

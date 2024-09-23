@@ -34,11 +34,26 @@ const TranslationsBox = ({ segment, pinyin_map }) => {
       <h3 className="segment-text">{mainPhrase} ({pinyin_map[mainPhrase]})</h3>
       <p className="segment-definition">{definition}</p>
 
-      <h4 className="inner-translations-title">Inner Translations</h4>
-      <div className="inner-translations-div">
-        {JSON.stringify(tokenMap)}
-      </div>
+      {tokenMap && Object.keys(tokenMap).length > 0 &&
+        <div className="inner-translations-div">
+          <h4 className="inner-translations-title">Inner Translations</h4>
+          <TranslationList translationsMap={tokenMap} />
+        </div>
+      }
     </div>
+  )
+}
+
+const TranslationList = ({ translationsMap }) => {
+  var listItems = []
+  Object.keys(translationsMap).forEach(phrase => {
+    listItems.push(<li>{phrase}: {translationsMap[phrase]}</li>)
+  })
+
+  return (
+    <ul>
+      {listItems}
+    </ul>
   )
 }
 
