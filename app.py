@@ -13,25 +13,29 @@ CORS(app)
 # Route to return segments, tokens, and pinyin to React UI
 @app.route('/generateAnnotations/<text>')
 def generateAnnotations(text):
-  token_list = jieba.tokenize(text,mode='search')
   segments = list(jieba.cut(text, cut_all=False))
-  tk_dict = create_tk_dict(token_list)
   pinyin_dict = create_pinyin_dict(text, segments)
   seg_list = create_seg_list(segments)
   print('\n\n\n\n\nResults')
-  print('token list ', list(token_list))
   print('pinyin dict ', pinyin_dict)
   result = {
     "segments": seg_list,
-    "tokens": tk_dict,
     "pinyin_map": pinyin_dict
   }
   return result
 
-# TODO: finish this
+
 # Route to return tokens + translations for a piece of text
-def tokenizeAndTranslate(text):
+@app.route('/tokenizeAndTranslateTokens/<text>')
+def tokenizeAndTranslateTokens(text):
   token_list = jieba.tokenize(text, mode='search')
+  trans_dict = {}
+  for token in token_list:
+    tk = token[0]
+    if is_chn(tk) and tk != text:
+      trans_dict[tk] = translate(tk)
+  print("trans_dict: ", trans_dict)
+  return { "token_translations_map": trans_dict }
 
 
 # Translate text with Google Translate
@@ -46,6 +50,7 @@ def is_chn(character):
    return character > u'\u4e00' and character < u'\u9fff'
 
 
+# Deprecated - replaced with tokenizeAndTranslateTokens
 def create_tk_dict(tk_list):
   """
 	Maps Chinese characters in text to a list of the tokens they're in
@@ -76,8 +81,7 @@ def create_tk_dict(tk_list):
 
 def create_pinyin_dict(text, segments):
   """
-  Returns a mapping of all characters and tokens in segments to their 
-  corresponding pinyin
+  Returns a mapping of segments to their corresponding pinyin
 
   The returned mapping looks like this: 
   { <token> : <pinyin> }
@@ -88,18 +92,18 @@ def create_pinyin_dict(text, segments):
   pinyin_dict = {}
   p = pinyin_jyutping.PinyinJyutping()
   # tokens = {tk[0] for tk in tk_list}
-  characters = {c for c in text if  is_chn(c)}
+  # characters = {c for c in text if  is_chn(c)}
   print("segments: ", segments)
 
-  to_translate = set(segments).union(characters)
-  for t in to_translate:
-    if len(t) > 0 and is_chn(t[0]):
-      if t not in pinyin_dict:
+  # to_translate = set(segments).union(characters)
+  for s in segments:
+    if len(s) > 0 and is_chn(s[0]):
+      if s not in pinyin_dict:
         # py = pinyin.get(t)
-        py = p.pinyin(t, spaces=True)
-        pinyin_dict.update({ t : py })
+        py = p.pinyin(s, spaces=True)
+        pinyin_dict.update({ s : py })
       else:
-        pinyin_dict += { t : py }
+        pinyin_dict += { s : py }
   return pinyin_dict
 
 

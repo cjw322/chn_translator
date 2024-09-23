@@ -1,13 +1,10 @@
+import './TranslationsBox.css';
 import React, { useState, useEffect } from 'react';
 
-const TranslationsBox = ({ segment, pinyin_map, tokens }) => {
+const TranslationsBox = ({ segment, pinyin_map }) => {
   const [mainPhrase, setMainPhrase] = useState("");
   const [definition, setDefinition] = useState("");
-
-  var innerTranslations = [];
-  var tokenTranslations = {};
-  var startIndex = segment[0][1]
-  const endIndex = segment[segment.length - 1][1]
+  const [tokenMap, setTokenMap] = useState(null);
 
   useEffect(() => {
     var phrase = "";
@@ -24,28 +21,13 @@ const TranslationsBox = ({ segment, pinyin_map, tokens }) => {
       ).then(response => {
         return response.json()
       }).then(json => setDefinition(json["translation"]))
+
+      fetch('http://127.0.0.1:5000/tokenizeAndTranslateTokens/' + mainPhrase
+      ).then(response => {
+        return response.json()
+      }).then(json => setTokenMap(json["token_translations_map"]))
     }
   }, [mainPhrase])
-
-  while (startIndex <= endIndex) {
-    const tokenList = tokens[startIndex]
-    console.log("start index: ", startIndex)
-    tokenList?.forEach(token => {
-      console.log("token: ", token)
-
-      var translation = ""
-      if (!(token in tokenTranslations)) {
-        fetch('http://127.0.0.1:5000/translate/' + token
-        ).then(response => {
-          translation = JSON.stringify(response)
-          console.log("translation: ", translation)
-        })
-        tokenTranslations[token] = translation
-      }
-    })
-
-    startIndex++;
-  }
 
   return (
     <div className="translations-box" >
@@ -54,7 +36,7 @@ const TranslationsBox = ({ segment, pinyin_map, tokens }) => {
 
       <h4 className="inner-translations-title">Inner Translations</h4>
       <div className="inner-translations-div">
-        {JSON.stringify(tokenTranslations)}
+        {JSON.stringify(tokenMap)}
       </div>
     </div>
   )

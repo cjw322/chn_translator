@@ -26,7 +26,7 @@ const Segment = ({ segment, pinyin_map, onClick }) => {
   var count = 0;
 
   segment.forEach(characterInfo => {
-    if (!(characterInfo[0] in pinyin_map)) {
+    if (!(phrase in pinyin_map)) {
       isColored = false;
     }
     characterList.push(<Character

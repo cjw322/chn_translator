@@ -11,7 +11,7 @@ class App extends React.Component {
       acceptingInput: true,
       pinyin_map: null,
       segments: [],
-      tokens: null,
+      submitClicked: false,
       clickedSegment: null
     };
 
@@ -21,12 +21,13 @@ class App extends React.Component {
   }
 
   handleChange(event) {
+    this.setState({ submitClicked: false })
     this.setState({ inputText: event.target.value });
   }
 
   handleSubmit(event) {
     event.preventDefault();
-    alert(JSON.stringify(this.state.inputText))
+    this.setState({ submitClicked: true })
 
     fetch('http://127.0.0.1:5000/generateAnnotations/' + this.state.inputText
     ).then(response => {
@@ -35,7 +36,6 @@ class App extends React.Component {
       this.setState({
         pinyin_map: json["pinyin_map"],
         segments: json["segments"],
-        tokens: json["tokens"],
         acceptingInput: false
       })
     })
@@ -69,23 +69,22 @@ class App extends React.Component {
             </label>
             <input type="submit" value="Submit" />
           </form>
-          <div className="translations-box">
-            <p>{JSON.stringify(this.state.pinyin_map)}</p>
-            {this.state.clickedSegment && this.state.pinyin_map && this.state.tokens && <TranslationsBox
+          <div className="translations-box-div">
+            {this.state.clickedSegment && this.state.pinyin_map && <TranslationsBox
               segment={this.state.clickedSegment}
               pinyin_map={this.state.pinyin_map}
-              tokens={this.state.tokens}
             />}
           </div>
         </div>
 
         <div className="text-side">
           <div className="text-box">
-            {this.state.segments && this.state.pinyin_map != null && <SegmentList
+            {this.state.segments && this.state.pinyin_map && <SegmentList
               segments={this.state.segments}
               pinyin_map={this.state.pinyin_map}
               onClick={this.onClick}
             />}
+            {this.state.submitClicked && !(this.state.segments && this.state.pinyin_map) && <p>Loading...</p>}
           </div>
         </div>
       </div>
