@@ -25,7 +25,19 @@ def generateAnnotations(text):
   return result
 
 
-# Route to return tokens + translations for a piece of text
+# Route to return tokens + their translations for a piece of text
+@app.route('/splitAndTranslateCharacters/<text>')
+def splitAndTranslateCharacters(text):
+  translator = Translator()
+  trans_dict = {}
+  for character in text:
+    if is_chn(character):
+      trans_dict[character] = translator.translate(character).text
+  print("trans_dict: ", trans_dict)
+  return { "char_translations_map": trans_dict }
+
+
+# Route to return individual characters + their translations for a piece of text
 @app.route('/tokenizeAndTranslateTokens/<text>')
 def tokenizeAndTranslateTokens(text):
   translator = Translator()
