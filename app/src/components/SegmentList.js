@@ -1,12 +1,13 @@
 import './SegmentList.css';
 import React from 'react';
 
-const SegmentList = ({ segments, translations }) => {
+const SegmentList = ({ segments, pinyin_map, onClick }) => {
   var segmentList = []
   segments.forEach(segment => {
     segmentList.push(<Segment
       segment={segment}
-      translations={translations}
+      pinyin_map={pinyin_map}
+      onClick={onClick}
     />)
   });
 
@@ -17,34 +18,41 @@ const SegmentList = ({ segments, translations }) => {
   )
 }
 
-const Segment = ({ segment, translations }) => {
+const Segment = ({ segment, pinyin_map, onClick }) => {
   var characterList = [];
   var isColored = true;
+  const phrase = segment.map(s => s[0]).join("");
+  var pinyin = phrase in pinyin_map ? pinyin_map[phrase].split(" ") : "";
+  var count = 0;
+
   segment.forEach(characterInfo => {
-    if (!(characterInfo[0] in translations)) {
+    if (!(characterInfo[0] in pinyin_map)) {
       isColored = false;
     }
     characterList.push(<Character
       characterInfo={characterInfo}
-      translations={translations}
+      pinyin={pinyin[count]}
     />)
+    count++;
   });
   return (
-    <div className={isColored ? "segment colored-segment" : "segment"}>
+    <button
+      className={isColored ? "segment colored-segment" : "segment"}
+      onClick={isColored ? () => onClick(segment) : () => { }}
+    >
       {characterList}
-    </div>
+    </button>
   )
 }
 
-const Character = ({ characterInfo, translations }) => {
+const Character = ({ characterInfo, pinyin }) => {
   const character = characterInfo[0]
   const index = characterInfo[1]
-  const pinyin = character in translations ? translations[character][0] : " "
   return (
     <div className="character-with-pinyin">
       <p className="pinyin">{pinyin}</p>
-      {character in translations && <p className="character" id={"char" + index}>{character}</p>}
-      {!(character in translations) && <p className="character">{character}</p>}
+      {pinyin != "" && <p className="character" id={"char" + index}>{character}</p>}
+      {pinyin == "" && <p className="character">{character}</p>}
     </div>
   );
 }

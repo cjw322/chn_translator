@@ -44,6 +44,12 @@ body,
   min-height: 100vh;
 }
 
+button {
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+
 /* Body */
 
 .main-content {
@@ -52,24 +58,29 @@ body,
   height: max-content;
 }
 
+/* Translations Side */
+
+.translations-side {
+  width: 50vw;
+  height: 100vh;
+  padding: 4%;
+}
+
+.translations-box {
+  border: 5px #729B79;
+  border-radius: 15px;
+}
+
 /* Text Side */
 
 .text-side {
   width: 50vw;
   height: 100vh;
   padding: 4%;
-}
-
-/* Translated Side */
-
-.translated-side {
-  width: 50vw;
-  height: 100vh;
-  padding: 4%;
   background-color: #729B79;
 }
 
-.translated-text-box {
+.text-box {
   background-color: white;
   border-radius: 25px;
   height: 84%;

@@ -3,41 +3,43 @@
 from flask import Flask, request, render_template, redirect, url_for
 from flask_cors import CORS
 import jieba
-import pinyin
+import pinyin_jyutping
 from googletrans import Translator
 # tutorial: https://www.freecodecamp.org/news/how-to-build-a-web-application-using-flask-and-deploy-it-to-the-cloud-3551c985e492/
 
 app = Flask(__name__)
 CORS(app)
 
-# Route to collect input
-@app.route('/input', methods = ['POST'])
-def input():
-  if request.method == 'POST':  
-    text = request.form.get('input')
-    return redirect(url_for('translate', text=text))
-
-
-@app.route('/translate/<text>')
-def translate(text):
+# Route to return segments, tokens, and pinyin to React UI
+@app.route('/generateAnnotations/<text>')
+def generateAnnotations(text):
   token_list = jieba.tokenize(text,mode='search')
+  segments = list(jieba.cut(text, cut_all=False))
   tk_dict = create_tk_dict(token_list)
-  trans_dict = create_trans_dict(text, token_list)
-  seg_list = create_seg_list(text)
+  pinyin_dict = create_pinyin_dict(text, segments)
+  seg_list = create_seg_list(segments)
   print('\n\n\n\n\nResults')
   print('token list ', list(token_list))
-  print('trans dict ', trans_dict)
-  # return render_template(
-  #   "index.html", 
-  #   input=text, seg_list=seg_list, 
-  #   tkn_dict=tk_dict, trans_dict=trans_dict
-  # )
+  print('pinyin dict ', pinyin_dict)
   result = {
     "segments": seg_list,
     "tokens": tk_dict,
-    "translations": trans_dict
+    "pinyin_map": pinyin_dict
   }
   return result
+
+# TODO: finish this
+# Route to return tokens + translations for a piece of text
+def tokenizeAndTranslate(text):
+  token_list = jieba.tokenize(text, mode='search')
+
+
+# Translate text with Google Translate
+@app.route('/translate/<text>')
+def translate(text):
+  translator = Translator()
+  translation = translator.translate(text).text
+  return { "translation" : translation }
 
 
 def is_chn(character):
@@ -72,39 +74,36 @@ def create_tk_dict(tk_list):
   return tk_dict
 
 
-def create_trans_dict(text, tk_list):
+def create_pinyin_dict(text, segments):
   """
-  Returns a mapping of all characters and tokens in tk_list to a tuple of their 
-  corresponding pinyin and translation
+  Returns a mapping of all characters and tokens in segments to their 
+  corresponding pinyin
 
   The returned mapping looks like this: 
-  { <token> : (<pinyin>, <translation>) }
+  { <token> : <pinyin> }
 
   Example:
-  {'家': ('jiā', 'Home'), '大': ('dà', 'Big'), 
-  '好': ('hǎo', 'it is good'), '大家': ('dàjiā', 'Everyone')}
+  {'家': 'jiā', '大': 'dà', '好': 'hǎo', '大家': 'dàjiā'}
   """
-  # print("Creating Trans Dict")
-  trans_dict = {}
-  tokens = {tk[0] for tk in tk_list}
+  pinyin_dict = {}
+  p = pinyin_jyutping.PinyinJyutping()
+  # tokens = {tk[0] for tk in tk_list}
   characters = {c for c in text if  is_chn(c)}
+  print("segments: ", segments)
 
-  to_translate = tokens.union(characters)
+  to_translate = set(segments).union(characters)
   for t in to_translate:
     if len(t) > 0 and is_chn(t[0]):
-      if t not in trans_dict:
-        py = pinyin.get(t)
-        translator = Translator()
-        # print('t: ', t)
-        # print(translator.translate(t))
-        trans = translator.translate(t).text
-        trans_dict.update({ t : (py, trans) })
+      if t not in pinyin_dict:
+        # py = pinyin.get(t)
+        py = p.pinyin(t, spaces=True)
+        pinyin_dict.update({ t : py })
       else:
-        trans_dict += { t : (py, trans) }
-  return trans_dict
+        pinyin_dict += { t : py }
+  return pinyin_dict
 
 
-def create_seg_list(text):
+def create_seg_list(segments):
   """
   Returns a list of lists, where each list element is a representation of an 
   estimated token 'segment'. This representation is a tuple where each 
@@ -112,7 +111,6 @@ def create_seg_list(text):
 
   Example: 大家好 -> [ [(大, 0), (家, 1)] , [(好, 2)] ]
   """
-  segments = list(jieba.cut(text, cut_all=False))
   counter = 0
   res = []
   for s in segments:
@@ -124,7 +122,6 @@ def create_seg_list(text):
       else:
         s_list += [(character, -1)]
     res += [s_list]
-  # print(res)
   return res
 
 

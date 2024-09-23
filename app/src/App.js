@@ -1,6 +1,7 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import SegmentList from './components/SegmentList.js';
+import TranslationsBox from './components/TranslationsBox.js';
 
 class App extends React.Component {
   constructor(props) {
@@ -8,13 +9,15 @@ class App extends React.Component {
     this.state = {
       inputText: "",
       acceptingInput: true,
-      translations: null,
+      pinyin_map: null,
       segments: [],
-      tokens: null
+      tokens: null,
+      clickedSegment: null
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.onClick = this.onClick.bind(this);
   }
 
   handleChange(event) {
@@ -25,16 +28,24 @@ class App extends React.Component {
     event.preventDefault();
     alert(JSON.stringify(this.state.inputText))
 
-    fetch('http://127.0.0.1:5000/translate/' + this.state.inputText
+    fetch('http://127.0.0.1:5000/generateAnnotations/' + this.state.inputText
     ).then(response => {
       return response.json()
     }).then(json => {
       this.setState({
-        translations: json["translations"],
+        pinyin_map: json["pinyin_map"],
         segments: json["segments"],
         tokens: json["tokens"],
         acceptingInput: false
       })
+    })
+  }
+
+  onClick(segment) {
+    console.log("segment: ", segment)
+    console.log(typeof (segment))
+    this.setState({
+      clickedSegment: segment
     })
   }
 
@@ -49,7 +60,7 @@ class App extends React.Component {
 
     return (
       <div className="main-content">
-        <div className="text-side">
+        <div className="translations-side">
           <h1>Chinese Text Annotator</h1>
           <form onSubmit={this.handleSubmit}>
             <label>
@@ -58,22 +69,22 @@ class App extends React.Component {
             </label>
             <input type="submit" value="Submit" />
           </form>
-          <div className="annotated-text">
-            <div className="annotated-text">
-              <p>
-                {/* {JSON.stringify(this.state.segments)}
-                {JSON.stringify(this.state.tokens)} */}
-                {JSON.stringify(this.state.translations)}
-              </p>
-            </div>
+          <div className="translations-box">
+            <p>{JSON.stringify(this.state.pinyin_map)}</p>
+            {this.state.clickedSegment && this.state.pinyin_map && this.state.tokens && <TranslationsBox
+              segment={this.state.clickedSegment}
+              pinyin_map={this.state.pinyin_map}
+              tokens={this.state.tokens}
+            />}
           </div>
         </div>
 
-        <div className="translated-side">
-          <div className="translated-text-box">
-            {this.state.segments && this.state.translations != null && <SegmentList
+        <div className="text-side">
+          <div className="text-box">
+            {this.state.segments && this.state.pinyin_map != null && <SegmentList
               segments={this.state.segments}
-              translations={this.state.translations}
+              pinyin_map={this.state.pinyin_map}
+              onClick={this.onClick}
             />}
           </div>
         </div>
