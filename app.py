@@ -16,8 +16,6 @@ def generateAnnotations(text):
   segments = list(jieba.cut(text, cut_all=False))
   pinyin_dict = create_pinyin_dict(text, segments)
   seg_list = create_seg_list(segments)
-  print('\n\n\n\n\nResults')
-  print('pinyin dict ', pinyin_dict)
   result = {
     "segments": seg_list,
     "pinyin_map": pinyin_dict
@@ -45,7 +43,8 @@ def tokenizeAndTranslateTokens(text):
   trans_dict = {}
   for token in token_list:
     tk = token[0]
-    if is_chn(tk) and tk != text:
+    # Check both first and last chars, since yi(-) is not considered a chn char
+    if (is_chn(tk[0]) or is_chn(tk[-1])) and tk != text:
       trans_dict[tk] = translator.translate(tk).text
   print("trans_dict: ", trans_dict)
   return { "token_translations_map": trans_dict }
@@ -82,7 +81,7 @@ def create_tk_dict(tk_list):
     token = tk[0]
     start = tk[1]
     end = tk[2]
-    if len(token) > 0 and is_chn(token[0]):
+    if len(token) > 0 and (is_chn(token[0]) or is_chn(token[-1])):
       for i, c in enumerate(token):
         if start+i not in tk_dict:
           tk_dict.update({ start+i : [token] })
@@ -110,13 +109,9 @@ def create_pinyin_dict(text, segments):
 
   # to_translate = set(segments).union(characters)
   for s in segments:
-    if len(s) > 0 and is_chn(s[0]):
-      if s not in pinyin_dict:
-        # py = pinyin.get(t)
-        py = p.pinyin(s, spaces=True)
-        pinyin_dict.update({ s : py })
-      else:
-        pinyin_dict += { s : py }
+    if len(s) > 0 and (is_chn(s[0]) or is_chn(s[-1])):
+      py = p.pinyin(s, spaces=True)
+      pinyin_dict.update({ s : py })
   return pinyin_dict
 
 

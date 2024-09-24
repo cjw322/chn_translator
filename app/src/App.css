@@ -80,4 +80,5 @@ button {
   border-radius: 25px;
   height: 84%;
   padding: 4%;
+  overflow-y: auto;
 }

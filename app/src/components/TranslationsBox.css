@@ -4,3 +4,13 @@
   padding: 3%;
   margin-top: 5vh;
 }
+
+.show-char-trans-btn {
+  color: #475B63;
+  text-decoration: underline;
+}
+
+.show-char-trans-btn:hover {
+  color: #729B79;
+  text-decoration: underline;
+}

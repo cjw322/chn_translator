@@ -1,6 +1,7 @@
 .segment-list,
 .segment {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .segment {
